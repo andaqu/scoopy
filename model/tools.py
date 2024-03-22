@@ -8,7 +8,7 @@ load_dotenv()
 url = os.getenv("API_URL")
 
 token = os.getenv("BEARER_TOKEN")
-debug = True  # Set debug to True to enable debugging
+debug = os.getenv("DEBUG")  # Set debug to True to enable debugging
 
 archived_feedback = {} # Archive feedback per request, to prevent model from hallucinating average score
 
@@ -40,14 +40,21 @@ def place_order(item, quantity):
         "quantity": quantity
     }
 
+    # Make sure the first letter is capitalised
+    data['item'] = data['item'].capitalize()
+
     if debug:
         print("URL:", endpoint)
         print("Payload:", data)
 
     try:
         response = requests.post(endpoint, headers=headers, json=data)
+
+        if response.status_code in [400, 200]:
+            return json.dumps(response.json())
+        
         response.raise_for_status()
-        return json.dumps(response.json())
+
     except requests.exceptions.RequestException as e:
         print("Error placing order:", e)
         return None
@@ -132,8 +139,12 @@ def restock_item(item, quantity):
 
     try:
         response = requests.post(endpoint, headers=headers, json=data)
+
+        if response.status_code in [400, 200]:
+            return json.dumps(response.json())
+        
         response.raise_for_status()
-        return json.dumps(response.json())
+
     except requests.exceptions.RequestException as e:
         print("Error restocking item:", e)
         return None

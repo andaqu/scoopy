@@ -38,7 +38,6 @@ class Scoopy:
             event_handler=EventHandler()
         ) as stream2:
             
-            # Wait half a secondw
             stream2.until_done()
 
             if stream2.current_run.status == "requires_action":
